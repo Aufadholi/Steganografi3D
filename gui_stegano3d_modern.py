@@ -16,56 +16,31 @@ from vedo import Plotter, load
 import threading
 
 class ModernButton(QPushButton):
-    def __init__(self, text, style="primary"):
+    def __init__(self, text, color="#3498db", hover_color="#2980b9"):
         super().__init__(text)
-        self.style = style
-        self.apply_style()
-        
-    def apply_style(self):
-        styles = {
-            "primary": {
-                "bg": "#667eea", "hover": "#5a6fd8", "text": "white"
-            },
-            "success": {
-                "bg": "#48bb78", "hover": "#38a169", "text": "white"  
-            },
-            "danger": {
-                "bg": "#f56565", "hover": "#e53e3e", "text": "white"
-            },
-            "warning": {
-                "bg": "#ed8936", "hover": "#dd6b20", "text": "white"
-            },
-            "secondary": {
-                "bg": "#718096", "hover": "#4a5568", "text": "white"
-            }
-        }
-        
-        s = styles.get(self.style, styles["primary"])
-        
+        self.color = color
+        self.hover_color = hover_color
         self.setStyleSheet(f"""
             QPushButton {{
-                background: {s["bg"]};
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 {color}, stop: 1 {hover_color});
                 border: none;
-                border-radius: 8px;
-                color: {s["text"]};
-                font-weight: 600;
-                font-size: 13px;
-                padding: 14px 24px;
+                border-radius: 12px;
+                color: white;
+                font-weight: bold;
+                font-size: 11px;
+                padding: 12px 20px;
+                text-align: center;
                 min-height: 20px;
-                font-family: 'Segoe UI', sans-serif;
             }}
             QPushButton:hover {{
-                background: {s["hover"]};
-                border: 2px solid {s["bg"]};
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                          stop: 0 {hover_color}, stop: 1 {color});
+                transform: translateY(-2px);
             }}
             QPushButton:pressed {{
-                background: {s["hover"]};
-                border: 2px solid {s["bg"]};
-            }}
-            QPushButton:disabled {{
-                background: #e2e8f0;
-                color: #a0aec0;
-                border: 1px solid #cbd5e0;
+                background: {hover_color};
+                transform: translateY(0px);
             }}
         """)
 
@@ -75,21 +50,16 @@ class ModernLineEdit(QLineEdit):
         self.setPlaceholderText(placeholder)
         self.setStyleSheet("""
             QLineEdit {
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
-                padding: 12px 16px;
-                font-size: 14px;
+                border: 2px solid #bdc3c7;
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 11px;
                 background: white;
-                font-family: 'Segoe UI', sans-serif;
-                selection-background-color: #667eea;
+                selection-background-color: #3498db;
             }
             QLineEdit:focus {
-                border: 2px solid #667eea;
-                background: #f7fafc;
-                outline: none;
-            }
-            QLineEdit:hover {
-                border: 1px solid #cbd5e0;
+                border: 2px solid #3498db;
+                background: #f8f9fa;
             }
         """)
 
@@ -98,71 +68,65 @@ class ModernGroupBox(QGroupBox):
         super().__init__(title)
         self.setStyleSheet("""
             QGroupBox {
-                font-weight: 600;
-                font-size: 16px;
-                color: #2d3748;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                margin: 20px 0px;
-                padding-top: 24px;
-                background: white;
-                font-family: 'Segoe UI', sans-serif;
+                font-weight: bold;
+                font-size: 12px;
+                color: #2c3e50;
+                border: 2px solid #bdc3c7;
+                border-radius: 10px;
+                margin: 15px 0px;
+                padding-top: 15px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
-                left: 16px;
-                top: -8px;
-                padding: 4px 12px;
+                left: 20px;
+                padding: 5px 10px;
                 background: white;
-                border: 1px solid #e2e8f0;
-                border-radius: 4px;
-                color: #4a5568;
+                border-radius: 5px;
             }
         """)
 
 class StatusBar(QLabel):
     def __init__(self):
         super().__init__()
-        self.setFixedHeight(40)
+        self.setFixedHeight(30)
         self.setAlignment(Qt.AlignCenter)
-        self.update_status("Aplikasi Siap", "info")
+        self.update_status("Aplikasi Siap", "success")
         
     def update_status(self, message, status_type="info"):
         colors = {
-            "success": {"bg": "#48bb78", "icon": "✓"},
-            "error": {"bg": "#f56565", "icon": "✗"}, 
-            "warning": {"bg": "#ed8936", "icon": "⚠"},
-            "info": {"bg": "#667eea", "icon": "ℹ"}
+            "success": "#27ae60",
+            "error": "#e74c3c", 
+            "warning": "#f39c12",
+            "info": "#3498db"
         }
-        
-        style_info = colors.get(status_type, colors["info"])
-        self.setText(f"{style_info['icon']} {message}")
+        color = colors.get(status_type, colors["info"])
+        self.setText(message)
         self.setStyleSheet(f"""
             QLabel {{
-                background: {style_info["bg"]};
+                background: {color};
                 color: white;
-                font-weight: 600;
-                font-size: 13px;
-                border-radius: 6px;
-                padding: 8px 20px;
-                font-family: 'Segoe UI', sans-serif;
+                font-weight: bold;
+                font-size: 10px;
+                border-radius: 15px;
+                padding: 5px 15px;
             }}
         """)
 
 class Stegano3DApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Steganografi 3D - Modern Interface')
-        self.setGeometry(100, 100, 1100, 750)
-        self.setMinimumSize(1000, 700)
+        self.setWindowTitle('🔐 Steganografi 3D Premium - GUI Modern')
+        self.setGeometry(100, 100, 1000, 700)
+        self.setMinimumSize(900, 650)
         self.steg = ComplexSteganographer()
         self.status_bar = StatusBar()
         
-        # Set elegant background
+        # Set background gradient
         self.setStyleSheet("""
             QWidget {
-                background: #f7fafc;
+                background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
+                                          stop: 0 #74b9ff, stop: 1 #0984e3);
                 font-family: 'Segoe UI', Arial, sans-serif;
             }
         """)
@@ -176,8 +140,8 @@ class Stegano3DApp(QWidget):
 
     def init_ui(self):
         main_layout = QVBoxLayout()
-        main_layout.setSpacing(24)
-        main_layout.setContentsMargins(32, 32, 32, 32)
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(20, 20, 20, 20)
 
         # Header
         header = self.create_header()
@@ -187,30 +151,21 @@ class Stegano3DApp(QWidget):
         tab_widget = QTabWidget()
         tab_widget.setStyleSheet("""
             QTabWidget::pane {
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                background: white;
-                margin-top: 8px;
+                border: 2px solid #bdc3c7;
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.95);
             }
             QTabBar::tab {
-                background: #edf2f7;
-                color: #4a5568;
-                padding: 16px 28px;
-                margin: 0px 2px;
-                border-top-left-radius: 6px;
-                border-top-right-radius: 6px;
-                font-weight: 500;
-                font-size: 14px;
-                font-family: 'Segoe UI', sans-serif;
+                background: #ecf0f1;
+                color: #2c3e50;
+                padding: 12px 20px;
+                margin: 2px;
+                border-radius: 8px;
+                font-weight: bold;
             }
             QTabBar::tab:selected {
-                background: white;
-                color: #2d3748;
-                border-bottom: 2px solid #667eea;
-                font-weight: 600;
-            }
-            QTabBar::tab:hover {
-                background: #e2e8f0;
+                background: #3498db;
+                color: white;
             }
         """)
         
@@ -224,7 +179,7 @@ class Stegano3DApp(QWidget):
         
         # Tab 3: 3D Viewer
         viewer_tab = self.create_viewer_tab()
-        tab_widget.addTab(viewer_tab, "🎯 Viewer")
+        tab_widget.addTab(viewer_tab, "🎯 3D Viewer")
         
         main_layout.addWidget(tab_widget)
         
@@ -235,52 +190,31 @@ class Stegano3DApp(QWidget):
 
     def create_header(self):
         header_frame = QFrame()
-        header_frame.setFixedHeight(100)
+        header_frame.setFixedHeight(80)
         header_frame.setStyleSheet("""
             QFrame {
-                background: white;
-                border-radius: 12px;
-                border: 1px solid #e2e8f0;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 15px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
             }
         """)
         
         header_layout = QHBoxLayout()
-        header_layout.setContentsMargins(32, 0, 32, 0)
         
-        # Title with icon
-        title_layout = QVBoxLayout()
-        
-        main_title = QLabel("Steganografi 3D")
-        main_title.setStyleSheet("""
+        # Title
+        title = QLabel("🔐 STEGANOGRAFI 3D PREMIUM")
+        title.setStyleSheet("""
             QLabel {
-                font-size: 28px;
-                font-weight: 700;
-                color: #2d3748;
+                font-size: 24px;
+                font-weight: bold;
+                color: #2c3e50;
                 background: transparent;
                 border: none;
-                margin: 0px;
-                font-family: 'Segoe UI', sans-serif;
             }
         """)
+        title.setAlignment(Qt.AlignCenter)
         
-        subtitle = QLabel("Modern 3D Steganography Suite")
-        subtitle.setStyleSheet("""
-            QLabel {
-                font-size: 14px;
-                font-weight: 400;
-                color: #718096;
-                background: transparent;
-                border: none;
-                margin-top: -8px;
-                font-family: 'Segoe UI', sans-serif;
-            }
-        """)
-        
-        title_layout.addWidget(main_title)
-        title_layout.addWidget(subtitle)
-        title_layout.setAlignment(Qt.AlignCenter)
-        
-        header_layout.addLayout(title_layout)
+        header_layout.addWidget(title)
         header_frame.setLayout(header_layout)
         return header_frame
 
@@ -295,11 +229,9 @@ class Stegano3DApp(QWidget):
         
         # OBJ File
         obj_layout = QHBoxLayout()
-        obj_label = QLabel("File OBJ:")
-        obj_label.setStyleSheet("font-weight: 500; color: #4a5568; font-size: 14px;")
-        obj_layout.addWidget(obj_label)
+        obj_layout.addWidget(QLabel("File OBJ:"))
         self.obj_path = ModernLineEdit("Pilih file OBJ 3D model...")
-        self.obj_btn = ModernButton("📂 Browse", "secondary")
+        self.obj_btn = ModernButton("📂 Browse", "#e67e22", "#d35400")
         self.obj_btn.clicked.connect(self.pilih_obj)
         obj_layout.addWidget(self.obj_path)
         obj_layout.addWidget(self.obj_btn)
@@ -307,11 +239,9 @@ class Stegano3DApp(QWidget):
         
         # Message File
         pesan_layout = QHBoxLayout()
-        pesan_label = QLabel("File Pesan:")
-        pesan_label.setStyleSheet("font-weight: 500; color: #4a5568; font-size: 14px;")
-        pesan_layout.addWidget(pesan_label)
+        pesan_layout.addWidget(QLabel("File Pesan:"))
         self.pesan_path = ModernLineEdit("Pilih file pesan untuk disembunyikan...")
-        self.pesan_btn = ModernButton("📂 Browse", "secondary")
+        self.pesan_btn = ModernButton("📂 Browse", "#e67e22", "#d35400")
         self.pesan_btn.clicked.connect(self.pilih_pesan)
         pesan_layout.addWidget(self.pesan_path)
         pesan_layout.addWidget(self.pesan_btn)
@@ -325,9 +255,7 @@ class Stegano3DApp(QWidget):
         security_layout = QVBoxLayout()
         
         pass_layout = QHBoxLayout()
-        pass_label = QLabel("Password:")
-        pass_label.setStyleSheet("font-weight: 500; color: #4a5568; font-size: 14px;")
-        pass_layout.addWidget(pass_label)
+        pass_layout.addWidget(QLabel("Password:"))
         self.pass_input = ModernLineEdit("Masukkan password untuk enkripsi...")
         self.pass_input.setEchoMode(QLineEdit.Password)
         pass_layout.addWidget(self.pass_input)
@@ -337,14 +265,13 @@ class Stegano3DApp(QWidget):
         layout.addWidget(security_group)
         
         # Action Buttons
-        action_group = ModernGroupBox("Aksi Steganografi")
+        action_group = ModernGroupBox("⚡ Aksi Steganografi")
         action_layout = QHBoxLayout()
-        action_layout.setSpacing(16)
         
-        self.encode_btn = ModernButton("Encode\nSisipkan Pesan", "success")
+        self.encode_btn = ModernButton("🔐 ENCODE\nSisipkan Pesan", "#27ae60", "#229954")
         self.encode_btn.clicked.connect(self.encode)
         
-        self.decode_btn = ModernButton("Decode\nEkstrak Pesan", "danger")
+        self.decode_btn = ModernButton("🔓 DECODE\nEkstrak Pesan", "#e74c3c", "#c0392b")
         self.decode_btn.clicked.connect(self.decode)
         
         action_layout.addWidget(self.encode_btn)
@@ -353,21 +280,19 @@ class Stegano3DApp(QWidget):
         layout.addWidget(action_group)
         
         # Results
-        results_group = ModernGroupBox("Hasil")
+        results_group = ModernGroupBox("📊 Hasil")
         results_layout = QVBoxLayout()
         
         self.result_text = QTextEdit()
-        self.result_text.setMaximumHeight(160)
+        self.result_text.setMaximumHeight(150)
         self.result_text.setStyleSheet("""
             QTextEdit {
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
-                padding: 16px;
-                font-family: 'Consolas', 'Courier New', monospace;
-                font-size: 12px;
-                background: #f7fafc;
-                color: #2d3748;
-                line-height: 1.4;
+                border: 2px solid #bdc3c7;
+                border-radius: 8px;
+                padding: 10px;
+                font-family: 'Courier New';
+                font-size: 10px;
+                background: #f8f9fa;
             }
         """)
         results_layout.addWidget(self.result_text)
@@ -422,14 +347,13 @@ class Stegano3DApp(QWidget):
         layout.addWidget(cred_group)
         
         # Blockchain Actions
-        blockchain_group = ModernGroupBox("Aksi Blockchain")
+        blockchain_group = ModernGroupBox("🔗 Aksi Blockchain")
         blockchain_layout = QHBoxLayout()
-        blockchain_layout.setSpacing(16)
         
-        self.hash_btn = ModernButton("Hash File\nHitung & Simpan", "primary")
+        self.hash_btn = ModernButton("📝 HASH FILE\nHitung & Simpan", "#9b59b6", "#8e44ad")
         self.hash_btn.clicked.connect(self.hash_and_store)
         
-        self.verify_btn = ModernButton("Verify Hash\nVerifikasi Integritas", "warning")
+        self.verify_btn = ModernButton("✅ VERIFY HASH\nVerifikasi Integritas", "#f39c12", "#e67e22")
         self.verify_btn.clicked.connect(self.verify_hash)
         
         blockchain_layout.addWidget(self.hash_btn)
@@ -447,26 +371,22 @@ class Stegano3DApp(QWidget):
         layout = QVBoxLayout()
         
         # 3D Viewer Group
-        viewer_group = ModernGroupBox("3D Model Viewer")
+        viewer_group = ModernGroupBox("🎯 3D Model Viewer")
         viewer_layout = QVBoxLayout()
-        viewer_layout.setSpacing(16)
         
         info_label = QLabel("Gunakan viewer 3D untuk melihat model OBJ sebelum dan sesudah steganografi")
         info_label.setStyleSheet("""
             QLabel {
-                color: #718096;
+                color: #7f8c8d;
                 font-style: italic;
-                padding: 16px;
+                padding: 10px;
                 background: transparent;
                 border: none;
-                font-size: 13px;
-                font-family: 'Segoe UI', sans-serif;
             }
         """)
-        info_label.setWordWrap(True)
         viewer_layout.addWidget(info_label)
         
-        self.viewer_btn = ModernButton("Tampilkan 3D Model\nBuka Viewer", "primary")
+        self.viewer_btn = ModernButton("🎯 TAMPILKAN 3D MODEL\nBuka Viewer", "#1abc9c", "#16a085")
         self.viewer_btn.clicked.connect(self.tampil_3d)
         viewer_layout.addWidget(self.viewer_btn)
         
@@ -475,26 +395,25 @@ class Stegano3DApp(QWidget):
         
         # Instructions
         instructions = QTextEdit()
-        instructions.setMaximumHeight(220)
+        instructions.setMaximumHeight(200)
         instructions.setHtml("""
-        <h3 style="color: #2d3748; font-family: 'Segoe UI'; margin-bottom: 16px;">Petunjuk Penggunaan</h3>
-        <div style="color: #4a5568; font-size: 13px; line-height: 1.6; font-family: 'Segoe UI';">
-        <p><strong>1. Pilih File OBJ:</strong> Browse dan pilih model 3D dalam format .obj</p>
-        <p><strong>2. Pilih File Pesan:</strong> Browse dan pilih file teks yang akan disembunyikan</p>
-        <p><strong>3. Set Password:</strong> Masukkan password untuk enkripsi pesan</p>
-        <p><strong>4. Encode:</strong> Sisipkan pesan ke dalam model 3D</p>
-        <p><strong>5. Hash & Store:</strong> Hitung hash file untuk verifikasi integritas</p>
-        <p><strong>6. Decode:</strong> Ekstrak pesan tersembunyi dari model 3D</p>
-        <p><strong>7. 3D Viewer:</strong> Lihat model 3D sebelum/sesudah proses steganografi</p>
-        </div>
+        <h3 style="color: #2c3e50;">📖 Petunjuk Penggunaan:</h3>
+        <ol style="color: #34495e; font-size: 11px;">
+        <li><b>Pilih File OBJ:</b> Browse dan pilih model 3D dalam format .obj</li>
+        <li><b>Pilih File Pesan:</b> Browse dan pilih file teks yang akan disembunyikan</li>
+        <li><b>Set Password:</b> Masukkan password untuk enkripsi pesan</li>
+        <li><b>Encode:</b> Sisipkan pesan ke dalam model 3D</li>
+        <li><b>Hash & Store:</b> Hitung hash file untuk verifikasi integritas</li>
+        <li><b>Decode:</b> Ekstrak pesan tersembunyi dari model 3D</li>
+        <li><b>3D Viewer:</b> Lihat model 3D sebelum/sesudah proses steganografi</li>
+        </ol>
         """)
         instructions.setStyleSheet("""
             QTextEdit {
-                border: 1px solid #e2e8f0;
+                border: 2px solid #bdc3c7;
                 border-radius: 8px;
-                padding: 20px;
-                background: white;
-                font-family: 'Segoe UI', sans-serif;
+                padding: 15px;
+                background: rgba(255, 255, 255, 0.9);
             }
         """)
         layout.addWidget(instructions)
@@ -505,23 +424,19 @@ class Stegano3DApp(QWidget):
     def update_blockchain_status(self):
         status = get_blockchain_status()
         if "✓" in status:
-            bg_color = "#48bb78"
-            text_color = "white"
+            color = "#27ae60"
         else:
-            bg_color = "#fed7d7"
-            text_color = "#c53030"
+            color = "#e74c3c"
             
         self.blockchain_status_label.setText(status)
         self.blockchain_status_label.setStyleSheet(f"""
             QLabel {{
-                padding: 16px 20px;
+                padding: 15px;
                 border-radius: 8px;
-                font-weight: 500;
-                font-size: 14px;
-                background: {bg_color};
-                color: {text_color};
-                font-family: 'Segoe UI', sans-serif;
-                border: 1px solid #e2e8f0;
+                font-weight: bold;
+                font-size: 12px;
+                background: {color};
+                color: white;
             }}
         """)
 
